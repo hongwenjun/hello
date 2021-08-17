@@ -1,10 +1,20 @@
 #!/bin/bash
 
 ## License: GPL
-## It can reinstall Debian, Ubuntu, CentOS system with network.
-## Default root password: MoeClub.org
+## This is the magically modified version of the one-click reload script.
+## It can reinstall CentOS, Debian, Ubuntu and other Linux systems (continuously added) over the network in one click.
+## It can reinstall Windwos 2003, 7, 2008R2, 2012R2, 2016, 2019 and other Windows systems (continuously added) via the network in one click.
+## Support GRUB or GRUB2 for installing a clean minimal system.
+## Technical support is provided by the CXT (CXTHHHHH.com). (based on the original version of Vicer)
+
+## Magic Modify version author:
+## Default root password: cxthhhhh.com
+## WebSite: https://www.cxthhhhh.com
+## Written By CXT (CXTHHHHH.com)
+
+## Original version author:
 ## Blog: https://moeclub.org
-## Written By MoeClub.org
+## Written By Vicer (MoeClub.org)
 
 
 export tmpVER=''
@@ -184,7 +194,11 @@ function SelectMirror(){
   relese=$(echo $Relese |sed -r 's/(.*)/\L\1/')
   if [ "$Relese" == "Debian" ] || [ "$Relese" == "Ubuntu" ]; then
     inUpdate=''; [ "$Relese" == "Ubuntu" ] && inUpdate='-updates'
-    MirrorTEMP="SUB_MIRROR/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${relese}-installer/${VER}/initrd.gz"
+    if [[ "$isDigital" == '20.04' ]] || [[ "$DIST" == 'focal' ]]; then
+      MirrorTEMP="SUB_MIRROR/dists/${DIST}/main/installer-${VER}/current/legacy-images/netboot/${relese}-installer/${VER}/initrd.gz"
+    else
+      MirrorTEMP="SUB_MIRROR/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${relese}-installer/${VER}/initrd.gz"
+    fi
   elif [ "$Relese" == "CentOS" ]; then
     MirrorTEMP="SUB_MIRROR/${DIST}/os/${VER}/isolinux/initrd.img"
   fi
@@ -211,7 +225,7 @@ clear && echo -e "\n\033[36m# Check Dependence\033[0m\n"
 if [[ "$ddMode" == '1' ]]; then
   CheckDependence iconv;
   linux_relese='debian';
-  tmpDIST='jessie';
+  tmpDIST='stretch';
   tmpVER='amd64';
   tmpINS='auto';
 fi
@@ -265,7 +279,6 @@ if [[ -z "$DIST" ]]; then
         [[ "$isDigital" == '8' ]] && DIST='jessie';
         [[ "$isDigital" == '9' ]] && DIST='stretch';
         [[ "$isDigital" == '10' ]] && DIST='buster';
-        [[ "$isDigital" == '11' ]] && DIST='bullseye';
       }
     }
     LinuxMirror=$(SelectMirror "$Relese" "$DIST" "$VER" "$tmpMirror")
@@ -328,7 +341,7 @@ if [[ "$SpikCheckDIST" == '0' ]]; then
 fi
 
 [[ "$ddMode" == '1' ]] && {
-  export SSL_SUPPORT='https://github.com/MoeClub/MoeClub.github.io/raw/master/lib/wget_udeb_amd64.tar.gz';
+  export SSL_SUPPORT='https://www.cxthhhhh.com/CXT-Library/Network-Reinstall-System-Modify/CoreFiles/wget/wget_udeb_amd64.tar.gz';
   if [[ -n "$tmpURL" ]]; then
     DDURL="$tmpURL"
     echo "$DDURL" |grep -q '^http://\|^ftp://\|^https://';
@@ -347,7 +360,7 @@ fi
 
 [ -n "$ipAddr" ] && [ -n "$ipMask" ] && [ -n "$ipGate" ] && setNet='1';
 [[ -n "$tmpWORD" ]] && myPASSWORD="$(openssl passwd -1 "$tmpWORD")";
-[[ -z "$myPASSWORD" ]] && myPASSWORD='$1$4BJZaD0A$y1QykUnJ6mXprENfwpseH0';
+[[ -z "$myPASSWORD" ]] && myPASSWORD='$1$UIl1uSg0$tAW9qjOqoCto0CIUgUwHT1';
 
 if [[ -n "$interface" ]]; then
   IFETH="$interface"
@@ -405,10 +418,17 @@ echo -e "\n[\033[33m$Relese\033[0m] [\033[33m$DIST\033[0m] [\033[33m$VER\033[0m]
 
 if [[ "$linux_relese" == 'debian' ]] || [[ "$linux_relese" == 'ubuntu' ]]; then
   inUpdate=''; [ "$linux_relese" == 'ubuntu' ] && inUpdate='-updates'
-  wget --no-check-certificate -qO '/boot/initrd.img' "${LinuxMirror}/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${linux_relese}-installer/${VER}/initrd.gz"
-  [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'initrd.img' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
-  wget --no-check-certificate -qO '/boot/vmlinuz' "${LinuxMirror}/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${linux_relese}-installer/${VER}/linux"
-  [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'vmlinuz' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+  if [[ "$isDigital" == '20.04' ]] || [[ "$DIST" == 'focal' ]]; then
+    wget --no-check-certificate -qO '/boot/initrd.img' "${LinuxMirror}/dists/${DIST}/main/installer-${VER}/current/legacy-images/netboot/${linux_relese}-installer/${VER}/initrd.gz"
+    [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'initrd.img' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+    wget --no-check-certificate -qO '/boot/vmlinuz' "${LinuxMirror}/dists/${DIST}/main/installer-${VER}/current/legacy-images/netboot/${linux_relese}-installer/${VER}/linux"
+    [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'vmlinuz' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+  else
+    wget --no-check-certificate -qO '/boot/initrd.img' "${LinuxMirror}/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${linux_relese}-installer/${VER}/initrd.gz"
+    [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'initrd.img' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+    wget --no-check-certificate -qO '/boot/vmlinuz' "${LinuxMirror}/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${linux_relese}-installer/${VER}/linux"
+    [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'vmlinuz' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+  fi
   MirrorHost="$(echo "$LinuxMirror" |awk -F'://|/' '{print $2}')";
   MirrorFolder="$(echo "$LinuxMirror" |awk -F''${MirrorHost}'' '{print $2}')";
 elif [[ "$linux_relese" == 'centos' ]]; then
@@ -709,7 +729,6 @@ popularity-contest popularity-contest/participate boolean false
 
 d-i grub-installer/only_debian boolean true
 d-i grub-installer/bootdev string default
-d-i grub-installer/force-efi-extra-removable boolean true
 d-i finish-install/reboot_in_progress note
 d-i debian-installer/exit/reboot boolean true
 d-i preseed/late_command string	\
@@ -751,7 +770,7 @@ EOF
 
 [[ "$ddMode" == '1' ]] && {
 WinNoDHCP(){
-  echo -ne "for\0040\0057f\0040\0042tokens\00753\0052\0042\0040\0045\0045i\0040in\0040\0050\0047netsh\0040interface\0040show\0040interface\0040\0136\0174more\0040\00533\0040\0136\0174findstr\0040\0057I\0040\0057R\0040\0042本地\0056\0052\0040以太\0056\0052\0040Local\0056\0052\0040Ethernet\0042\0047\0051\0040do\0040\0050set\0040EthName\0075\0045\0045j\0051\r\nnetsh\0040\0055c\0040interface\0040ip\0040set\0040address\0040name\0075\0042\0045EthName\0045\0042\0040source\0075static\0040address\0075$IPv4\0040mask\0075$MASK\0040gateway\0075$GATE\r\nnetsh\0040\0055c\0040interface\0040ip\0040add\0040dnsservers\0040name\0075\0042\0045EthName\0045\0042\0040address\00758\00568\00568\00568\0040index\00751\0040validate\0075no\r\n\r\n" >>'/tmp/boot/net.tmp';
+  echo -ne "for\0040\0057f\0040\0042tokens\00753\0052\0042\0040\0045\0045i\0040in\0040\0050\0047netsh\0040interface\0040show\0040interface\0040\0136\0174more\0040\00533\0040\0136\0174findstr\0040\0057I\0040\0057R\0040\0042鏈湴\0056\0052\0040浠ュお\0056\0052\0040Local\0056\0052\0040Ethernet\0042\0047\0051\0040do\0040\0050set\0040EthName\0075\0045\0045j\0051\r\nnetsh\0040\0055c\0040interface\0040ip\0040set\0040address\0040name\0075\0042\0045EthName\0045\0042\0040source\0075static\0040address\0075$IPv4\0040mask\0075$MASK\0040gateway\0075$GATE\r\nnetsh\0040\0055c\0040interface\0040ip\0040add\0040dnsservers\0040name\0075\0042\0045EthName\0045\0042\0040address\00758\00568\00568\00568\0040index\00751\0040validate\0075no\r\n\r\n" >>'/tmp/boot/net.tmp';
 }
 WinRDP(){
   echo -ne "netsh\0040firewall\0040set\0040portopening\0040protocol\0075ALL\0040port\0075$WinRemote\0040name\0075RDP\0040mode\0075ENABLE\0040scope\0075ALL\0040profile\0075ALL\r\nnetsh\0040firewall\0040set\0040portopening\0040protocol\0075ALL\0040port\0075$WinRemote\0040name\0075RDP\0040mode\0075ENABLE\0040scope\0075ALL\0040profile\0075CURRENT\r\nreg\0040add\0040\0042HKLM\0134SYSTEM\0134CurrentControlSet\0134Control\0134Network\0134NewNetworkWindowOff\0042\0040\0057f\r\nreg\0040add\0040\0042HKLM\0134SYSTEM\0134CurrentControlSet\0134Control\0134Terminal\0040Server\0042\0040\0057v\0040fDenyTSConnections\0040\0057t\0040reg\0137dword\0040\0057d\00400\0040\0057f\r\nreg\0040add\0040\0042HKLM\0134SYSTEM\0134CurrentControlSet\0134Control\0134Terminal\0040Server\0134Wds\0134rdpwd\0134Tds\0134tcp\0042\0040\0057v\0040PortNumber\0040\0057t\0040reg\0137dword\0040\0057d\0040$WinRemote\0040\0057f\r\nreg\0040add\0040\0042HKLM\0134SYSTEM\0134CurrentControlSet\0134Control\0134Terminal\0040Server\0134WinStations\0134RDP\0055Tcp\0042\0040\0057v\0040PortNumber\0040\0057t\0040reg\0137dword\0040\0057d\0040$WinRemote\0040\0057f\r\nreg\0040add\0040\0042HKLM\0134SYSTEM\0134CurrentControlSet\0134Control\0134Terminal\0040Server\0134WinStations\0134RDP\0055Tcp\0042\0040\0057v\0040UserAuthentication\0040\0057t\0040reg\0137dword\0040\0057d\00400\0040\0057f\r\nFOR\0040\0057F\0040\0042tokens\00752\0040delims\0075\0072\0042\0040\0045\0045i\0040in\0040\0050\0047SC\0040QUERYEX\0040TermService\0040\0136\0174FINDSTR\0040\0057I\0040\0042PID\0042\0047\0051\0040do\0040TASKKILL\0040\0057F\0040\0057PID\0040\0045\0045i\r\nFOR\0040\0057F\0040\0042tokens\00752\0040delims\0075\0072\0042\0040\0045\0045i\0040in\0040\0050\0047SC\0040QUERYEX\0040UmRdpService\0040\0136\0174FINDSTR\0040\0057I\0040\0042PID\0042\0047\0051\0040do\0040TASKKILL\0040\0057F\0040\0057PID\0040\0045\0045i\r\nSC\0040START\0040TermService\r\n\r\n" >>'/tmp/boot/net.tmp';
