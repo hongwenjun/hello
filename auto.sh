@@ -6,6 +6,7 @@
 ## Blog: https://moeclub.org
 ## Written By MoeClub.org
 
+export ssh_port='22'
 
 export tmpVER=''
 export tmpDIST=''
@@ -135,7 +136,10 @@ while [[ $# -ge 1 ]]; do
       ;;
     *)
       if [[ "$1" != 'error' ]]; then echo -ne "\nInvaild option: '$1'\n\n"; fi
-      echo -ne " Usage:\n\tbash $(basename $0)\t-d/--debian [\033[33m\033[04mdists-name\033[0m]\n\t\t\t\t-u/--ubuntu [\033[04mdists-name\033[0m]\n\t\t\t\t-c/--centos [\033[33m\033[04mdists-verison\033[0m]\n\t\t\t\t-v/--ver [32/\033[33m\033[04mi386\033[0m|64/amd64]\n\t\t\t\t--ip-addr/--ip-gate/--ip-mask\n\t\t\t\t-apt/-yum/--mirror\n\t\t\t\t-dd/--image\n\t\t\t\t-a/--auto\n\t\t\t\t-m/--manual\n"
+      echo -ne " Usage:\n\tbash $(basename $0)\t-d/--debian [\033[33m\033[04mdists-name\033[0m]\n\
+\t\t\t\t-u/--ubuntu [\033[04mdists-name\033[0m]\n\t\t\t\t-c/--centos [\033[33m\033[04mdists-verison\033[0m]\n\
+\t\t\t\t-v/--ver [32/\033[33m\033[04mi386\033[0m|64/amd64]\n\t\t\t\t--ip-addr/--ip-gate/--ip-mask\n\
+\t\t\t\t-apt/-yum/--mirror\n\t\t\t\t-dd/--image\n\t\t\t\t-a/--auto\n\t\t\t\t-m/--manual\n\t\t\t\t-p PassWord\n"
       exit 1;
       ;;
     esac
@@ -184,7 +188,11 @@ function SelectMirror(){
   relese=$(echo $Relese |sed -r 's/(.*)/\L\1/')
   if [ "$Relese" == "Debian" ] || [ "$Relese" == "Ubuntu" ]; then
     inUpdate=''; [ "$Relese" == "Ubuntu" ] && inUpdate='-updates'
-    MirrorTEMP="SUB_MIRROR/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${relese}-installer/${VER}/initrd.gz"
+    if [[ "$isDigital" == '20.04' ]] || [[ "$DIST" == 'focal' ]]; then
+      MirrorTEMP="SUB_MIRROR/dists/${DIST}/main/installer-${VER}/current/legacy-images/netboot/${relese}-installer/${VER}/initrd.gz"
+    else
+      MirrorTEMP="SUB_MIRROR/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${relese}-installer/${VER}/initrd.gz"
+    fi
   elif [ "$Relese" == "CentOS" ]; then
     MirrorTEMP="SUB_MIRROR/${DIST}/os/${VER}/isolinux/initrd.img"
   fi
@@ -211,7 +219,7 @@ clear && echo -e "\n\033[36m# Check Dependence\033[0m\n"
 if [[ "$ddMode" == '1' ]]; then
   CheckDependence iconv;
   linux_relese='debian';
-  tmpDIST='jessie';
+  tmpDIST='stretch';
   tmpVER='amd64';
   tmpINS='auto';
 fi
@@ -265,6 +273,7 @@ if [[ -z "$DIST" ]]; then
         [[ "$isDigital" == '8' ]] && DIST='jessie';
         [[ "$isDigital" == '9' ]] && DIST='stretch';
         [[ "$isDigital" == '10' ]] && DIST='buster';
+        [[ "$isDigital" == '11' ]] && DIST='bullseye';
       }
     }
     LinuxMirror=$(SelectMirror "$Relese" "$DIST" "$VER" "$tmpMirror")
@@ -280,6 +289,7 @@ if [[ -z "$DIST" ]]; then
         [[ "$isDigital" == '14.04' ]] && DIST='trusty';
         [[ "$isDigital" == '16.04' ]] && DIST='xenial';
         [[ "$isDigital" == '18.04' ]] && DIST='bionic';
+        [[ "$isDigital" == '20.04' ]] && DIST='focal';
       }
     }
     LinuxMirror=$(SelectMirror "$Relese" "$DIST" "$VER" "$tmpMirror")
@@ -403,10 +413,17 @@ echo -e "\n[\033[33m$Relese\033[0m] [\033[33m$DIST\033[0m] [\033[33m$VER\033[0m]
 
 if [[ "$linux_relese" == 'debian' ]] || [[ "$linux_relese" == 'ubuntu' ]]; then
   inUpdate=''; [ "$linux_relese" == 'ubuntu' ] && inUpdate='-updates'
-  wget --no-check-certificate -qO '/boot/initrd.img' "${LinuxMirror}/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${linux_relese}-installer/${VER}/initrd.gz"
-  [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'initrd.img' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
-  wget --no-check-certificate -qO '/boot/vmlinuz' "${LinuxMirror}/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${linux_relese}-installer/${VER}/linux"
-  [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'vmlinuz' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+  if [[ "$isDigital" == '20.04' ]] || [[ "$DIST" == 'focal' ]]; then
+    wget --no-check-certificate -qO '/boot/initrd.img' "${LinuxMirror}/dists/${DIST}/main/installer-${VER}/current/legacy-images/netboot/${linux_relese}-installer/${VER}/initrd.gz"
+    [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'initrd.img' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+    wget --no-check-certificate -qO '/boot/vmlinuz' "${LinuxMirror}/dists/${DIST}/main/installer-${VER}/current/legacy-images/netboot/${linux_relese}-installer/${VER}/linux"
+    [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'vmlinuz' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+  else
+    wget --no-check-certificate -qO '/boot/initrd.img' "${LinuxMirror}/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${linux_relese}-installer/${VER}/initrd.gz"
+    [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'initrd.img' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+    wget --no-check-certificate -qO '/boot/vmlinuz' "${LinuxMirror}/dists/${DIST}${inUpdate}/main/installer-${VER}/current/images/netboot/${linux_relese}-installer/${VER}/linux"
+    [[ $? -ne '0' ]] && echo -ne "\033[31mError! \033[0mDownload 'vmlinuz' for \033[33m$linux_relese\033[0m failed! \n" && exit 1
+  fi
   MirrorHost="$(echo "$LinuxMirror" |awk -F'://|/' '{print $2}')";
   MirrorFolder="$(echo "$LinuxMirror" |awk -F''${MirrorHost}'' '{print $2}')";
 elif [[ "$linux_relese" == 'centos' ]]; then
@@ -707,12 +724,13 @@ popularity-contest popularity-contest/participate boolean false
 
 d-i grub-installer/only_debian boolean true
 d-i grub-installer/bootdev string default
-d-i grub-installer/force-efi-extra-removable boolean true
+### d-i grub-installer/force-efi-extra-removable boolean true
 d-i finish-install/reboot_in_progress note
 d-i debian-installer/exit/reboot boolean true
 d-i preseed/late_command string	\
 sed -ri 's/^#?PermitRootLogin.*/PermitRootLogin yes/g' /target/etc/ssh/sshd_config; \
-sed -ri 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/g' /target/etc/ssh/sshd_config;
+sed -ri 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/g' /target/etc/ssh/sshd_config; \
+sed -ri 's/^#Port 22/Port ${ssh_port}/g' /target/etc/ssh/sshd_config;
 EOF
 
 [[ "$loaderMode" != "0" ]] && AutoNet='1'
