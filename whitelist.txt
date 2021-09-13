@@ -1,0 +1,17 @@
+create whitelist hash:net family inet hashsize 1024 maxelem 1000000
+add whitelist 131.0.72.0/22
+add whitelist 103.22.200.0/22
+add whitelist 103.21.244.0/22
+add whitelist 141.101.64.0/18
+add whitelist 190.93.240.0/20
+add whitelist 188.114.96.0/20
+add whitelist 198.41.128.0/17
+add whitelist 108.162.192.0/18
+add whitelist 172.64.0.0/13
+add whitelist 197.234.240.0/22
+add whitelist 103.31.4.0/22
+add whitelist 173.245.48.0/20
+add whitelist 104.24.0.0/14
+add whitelist 172.17.0.0/24
+add whitelist 162.158.0.0/15
+add whitelist 104.16.0.0/13
