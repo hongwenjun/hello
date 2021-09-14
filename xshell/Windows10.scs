@@ -1,0 +1,23 @@
+[Color Scheme]
+text=cccccc
+cyan(bold)=61d6d6
+text(bold)=f2f2f2
+magenta=881798
+green=13a10e
+green(bold)=16c60c
+background=0c0c0c
+cyan=3a96dd
+red(bold)=e74856
+yellow=c19c00
+magenta(bold)=b4009e
+yellow(bold)=f9f1a5
+red=c50f1f
+white=ebebeb
+blue(bold)=3b78ff
+white(bold)=f2f2f2
+black=0c0c0c
+blue=0037da
+black(bold)=767676
+
+# https://www.262235.xyz/index.php/archives/416/
+# https://blogs.msdn.microsoft.com/commandline/2017/08/02/updating-the-windows-console-colors/
